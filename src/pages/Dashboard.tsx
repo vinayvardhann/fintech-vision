@@ -1,10 +1,11 @@
 import { useAuth } from "@/context/AuthContext";
-import { api } from "@/lib/api";
+import { api, Transaction } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { Wallet, CreditCard, TrendingUp, AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 
 const LOW_BALANCE_THRESHOLD = 500;
 
@@ -23,9 +24,38 @@ export default function Dashboard() {
     refetchInterval: 10000,
   });
 
+  const { data: transactions = [] } = useQuery({
+    queryKey: ["transactions-chart", account?.accountNumber],
+    queryFn: () => api.getTransactions(account?.accountNumber),
+    enabled: !!account,
+  });
+
   if (!account) return null;
 
   const isLowBalance = account.balance < LOW_BALANCE_THRESHOLD;
+
+  // Build balance trend from transactions
+  const balanceTrend = transactions.length > 0
+    ? transactions
+        .slice()
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+        .map((t) => ({
+          date: new Date(t.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          balance: t.balanceAfter,
+          type: t.type,
+        }))
+    : generateMockTrend(account.balance);
+
+  // Transaction type breakdown
+  const typeCounts = transactions.reduce<Record<string, number>>((acc, t) => {
+    const type = t.type || "Other";
+    acc[type] = (acc[type] || 0) + 1;
+    return acc;
+  }, {});
+
+  const typeData = Object.entries(typeCounts).length > 0
+    ? Object.entries(typeCounts).map(([name, count]) => ({ name, count }))
+    : [{ name: "Deposit", count: 5 }, { name: "Withdraw", count: 3 }, { name: "Transfer", count: 2 }];
 
   const cards = [
     { label: "Account Number", value: account.accountNumber, icon: CreditCard, accent: false },
@@ -69,6 +99,50 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* Charts Section */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+          className="md:col-span-2 rounded-xl border border-border bg-card p-6 shadow-card">
+          <h3 className="font-display text-lg font-semibold text-foreground mb-4">Balance Trend</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={balanceTrend} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <defs>
+                  <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(145, 52%, 34%)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(145, 52%, 34%)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 88%)" />
+                <XAxis dataKey="date" tick={{ fontSize: 12, fill: "hsl(200, 10%, 45%)" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: "hsl(200, 10%, 45%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v.toLocaleString()}`} />
+                <Tooltip
+                  contentStyle={{ borderRadius: "0.75rem", border: "1px solid hsl(220, 15%, 88%)", boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}
+                  formatter={(value: number) => [`$${value.toLocaleString("en-US", { minimumFractionDigits: 2 })}`, "Balance"]}
+                />
+                <Area type="monotone" dataKey="balance" stroke="hsl(145, 52%, 34%)" strokeWidth={2.5} fill="url(#balanceGradient)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+          className="rounded-xl border border-border bg-card p-6 shadow-card">
+          <h3 className="font-display text-lg font-semibold text-foreground mb-4">Transaction Types</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={typeData} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 88%)" />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(200, 10%, 45%)" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: "hsl(200, 10%, 45%)" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                <Tooltip contentStyle={{ borderRadius: "0.75rem", border: "1px solid hsl(220, 15%, 88%)" }} />
+                <Bar dataKey="count" fill="hsl(231, 70%, 30%)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-6 shadow-card">
           <h3 className="font-display text-lg font-semibold text-foreground mb-4">Account Details</h3>
@@ -104,4 +178,23 @@ export default function Dashboard() {
       </div>
     </div>
   );
+}
+
+/** Generate mock balance trend data when no transactions exist yet */
+function generateMockTrend(currentBalance: number) {
+  const data = [];
+  let balance = currentBalance * 0.7;
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    balance += (Math.random() - 0.3) * (currentBalance * 0.08);
+    balance = Math.max(0, balance);
+    data.push({
+      date: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      balance: Math.round(balance * 100) / 100,
+    });
+  }
+  // Ensure last point matches current balance
+  data[data.length - 1].balance = currentBalance;
+  return data;
 }

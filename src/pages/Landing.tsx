@@ -1,7 +1,8 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Zap, BarChart3, ArrowRight, CreditCard, Globe, Lock, Mail, Phone, MapPin } from "lucide-react";
+import { Shield, Zap, BarChart3, ArrowRight, CreditCard, Globe, Lock, Mail, Phone, MapPin, Menu, X } from "lucide-react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -16,6 +17,8 @@ const features = [
 ];
 
 export default function Landing() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
@@ -32,11 +35,41 @@ export default function Landing() {
             <a href="#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About</a>
             <a href="#contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contact</a>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
             <Link to="/login"><Button variant="ghost" size="sm">Sign In</Button></Link>
             <Link to="/signup"><Button variant="hero" size="sm">Get Started</Button></Link>
           </div>
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden flex items-center justify-center h-10 w-10 rounded-lg hover:bg-muted transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5 text-foreground" /> : <Menu className="h-5 w-5 text-foreground" />}
+          </button>
         </div>
+
+        {/* Mobile menu dropdown */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden overflow-hidden border-t border-border/50 bg-background/95 backdrop-blur-xl"
+            >
+              <div className="container mx-auto px-6 py-4 space-y-3">
+                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
+                <a href="#about" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">About</a>
+                <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">Contact</a>
+                <div className="flex flex-col gap-2 pt-2 border-t border-border/50">
+                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}><Button variant="ghost" className="w-full justify-center">Sign In</Button></Link>
+                  <Link to="/signup" onClick={() => setMobileMenuOpen(false)}><Button variant="hero" className="w-full justify-center">Get Started</Button></Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero */}
