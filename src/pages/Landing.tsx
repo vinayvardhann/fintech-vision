@@ -2,7 +2,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Zap, BarChart3, ArrowRight, CreditCard, Globe, Lock, Mail, Phone, MapPin, Menu, X } from "lucide-react";
+import { Shield, Zap, BarChart3, ArrowRight, CreditCard, Lock, Mail, Phone, MapPin, Menu, X } from "lucide-react";
+import Footer from "@/components/Footer";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -26,7 +27,7 @@ export default function Landing() {
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-navy">
-              <Globe className="h-5 w-5 text-primary-foreground" />
+              <span className="text-primary-foreground font-display font-bold text-sm">VB</span>
             </div>
             <span className="font-display text-xl font-bold text-foreground">VaultBank</span>
           </Link>
@@ -39,7 +40,6 @@ export default function Landing() {
             <Link to="/login"><Button variant="ghost" size="sm">Sign In</Button></Link>
             <Link to="/signup"><Button variant="hero" size="sm">Get Started</Button></Link>
           </div>
-          {/* Mobile hamburger */}
           <button
             className="md:hidden flex items-center justify-center h-10 w-10 rounded-lg hover:bg-muted transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -49,7 +49,6 @@ export default function Landing() {
           </button>
         </div>
 
-        {/* Mobile menu dropdown */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -87,7 +86,7 @@ export default function Landing() {
               <span className="text-gradient-accent">Simplified</span>
             </motion.h1>
             <motion.p initial="hidden" animate="visible" variants={fadeUp} custom={2} className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              Experience seamless account management, instant fund transfers, and powerful financial analytics — all in one elegant platform.
+              Experience seamless account management, instant fund transfers, and powerful financial analytics — built for the Indian banking ecosystem.
             </motion.p>
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link to="/signup">
@@ -101,7 +100,6 @@ export default function Landing() {
             </motion.div>
           </div>
         </div>
-        {/* Decorative shapes */}
         <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-accent/5 blur-3xl animate-float" />
         <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-primary/5 blur-3xl animate-float" style={{ animationDelay: "3s" }} />
       </section>
@@ -133,19 +131,19 @@ export default function Landing() {
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-16 items-center">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">Built for the Future of Finance</h2>
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">Built for the Future of Indian Finance</h2>
               <p className="text-muted-foreground mb-4 leading-relaxed">
-                VaultBank is a cutting-edge banking transaction simulator that demonstrates real-world financial operations with enterprise-grade architecture.
+                VaultBank is a cutting-edge banking transaction simulator that demonstrates real-world financial operations with enterprise-grade architecture, designed for the Indian banking ecosystem.
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                Powered by Spring Boot 3.5 on the backend and a modern React frontend, it showcases deposits, withdrawals, fund transfers, and comprehensive financial reporting.
+                Powered by Spring Boot 3.5 on the backend and a modern React frontend, it showcases deposits, withdrawals, fund transfers, and comprehensive financial reporting — all in Indian Rupees (₹).
               </p>
             </motion.div>
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}
               className="rounded-2xl gradient-navy p-8 text-primary-foreground">
               <div className="space-y-6">
                 {[
-                  { label: "Transactions Processed", value: "1M+" },
+                  { label: "Transactions Processed", value: "10L+" },
                   { label: "Uptime Guarantee", value: "99.9%" },
                   { label: "Response Time", value: "<50ms" },
                 ].map((s) => (
@@ -169,9 +167,9 @@ export default function Landing() {
           </motion.div>
           <div className="max-w-md mx-auto space-y-4">
             {[
-              { icon: Mail, text: "support@vaultbank.io" },
-              { icon: Phone, text: "+1 (555) 123-4567" },
-              { icon: MapPin, text: "123 Finance Street, New York, NY" },
+              { icon: Mail, text: "support@vaultbank.in" },
+              { icon: Phone, text: "+91 98765 43210" },
+              { icon: MapPin, text: "Bengaluru, Karnataka, India" },
             ].map((item, i) => (
               <motion.div key={item.text} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
                 className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-card">
@@ -185,20 +183,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="gradient-navy py-12">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/20">
-                <Globe className="h-4 w-4 text-accent" />
-              </div>
-              <span className="font-display text-lg font-bold text-primary-foreground">VaultBank</span>
-            </div>
-            <p className="text-sm text-primary-foreground/60">© 2026 VaultBank. Banking Transaction Simulator. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { api, Transaction } from "@/lib/api";
+import { formatINR } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Search, ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from "lucide-react";
@@ -63,11 +64,11 @@ export default function TransactionHistory() {
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-1.5">{typeIcon(t.type)} <span className="capitalize text-foreground">{t.type}</span></span>
                     </td>
-                    <td className="px-4 py-3 text-right font-medium text-foreground">${t.amount?.toLocaleString("en-US", { minimumFractionDigits: 2 })}</td>
-                    <td className="px-4 py-3 text-right text-muted-foreground">${t.balanceBefore?.toLocaleString("en-US", { minimumFractionDigits: 2 })}</td>
-                    <td className="px-4 py-3 text-right text-muted-foreground">${t.balanceAfter?.toLocaleString("en-US", { minimumFractionDigits: 2 })}</td>
+                    <td className="px-4 py-3 text-right font-medium text-foreground">{formatINR(t.amount)}</td>
+                    <td className="px-4 py-3 text-right text-muted-foreground">{formatINR(t.balanceBefore)}</td>
+                    <td className="px-4 py-3 text-right text-muted-foreground">{formatINR(t.balanceAfter)}</td>
                     <td className="px-4 py-3 text-muted-foreground max-w-[200px] truncate">{t.description || "—"}</td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs">{t.timestamp ? new Date(t.timestamp).toLocaleString() : "—"}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">{t.timestamp ? new Date(t.timestamp).toLocaleString("en-IN") : "—"}</td>
                   </tr>
                 ))
               )}

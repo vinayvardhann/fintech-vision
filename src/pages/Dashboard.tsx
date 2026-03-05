@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { api, Transaction } from "@/lib/api";
+import { formatINR } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
 import { Wallet, CreditCard, TrendingUp, AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,19 +35,17 @@ export default function Dashboard() {
 
   const isLowBalance = account.balance < LOW_BALANCE_THRESHOLD;
 
-  // Build balance trend from transactions
   const balanceTrend = transactions.length > 0
     ? transactions
         .slice()
         .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
         .map((t) => ({
-          date: new Date(t.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          date: new Date(t.timestamp).toLocaleDateString("en-IN", { month: "short", day: "numeric" }),
           balance: t.balanceAfter,
           type: t.type,
         }))
     : generateMockTrend(account.balance);
 
-  // Transaction type breakdown
   const typeCounts = transactions.reduce<Record<string, number>>((acc, t) => {
     const type = t.type || "Other";
     acc[type] = (acc[type] || 0) + 1;
@@ -59,7 +58,7 @@ export default function Dashboard() {
 
   const cards = [
     { label: "Account Number", value: account.accountNumber, icon: CreditCard, accent: false },
-    { label: "Current Balance", value: `$${account.balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}`, icon: Wallet, accent: true },
+    { label: "Current Balance", value: formatINR(account.balance), icon: Wallet, accent: true },
     { label: "Account Type", value: account.accountType, icon: TrendingUp, accent: false },
   ];
 
@@ -81,7 +80,7 @@ export default function Dashboard() {
           <AlertTriangle className="h-5 w-5 text-warning" />
           <div>
             <p className="font-medium text-foreground">Low Balance Alert</p>
-            <p className="text-sm text-muted-foreground">Your balance is below ${LOW_BALANCE_THRESHOLD.toFixed(2)}. Consider making a deposit.</p>
+            <p className="text-sm text-muted-foreground">Your balance is below {formatINR(LOW_BALANCE_THRESHOLD)}. Consider making a deposit.</p>
           </div>
         </motion.div>
       )}
@@ -99,7 +98,6 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Charts Section */}
       <div className="grid gap-6 md:grid-cols-3">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
           className="md:col-span-2 rounded-xl border border-border bg-card p-6 shadow-card">
@@ -115,10 +113,10 @@ export default function Dashboard() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 88%)" />
                 <XAxis dataKey="date" tick={{ fontSize: 12, fill: "hsl(200, 10%, 45%)" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 12, fill: "hsl(200, 10%, 45%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v.toLocaleString()}`} />
+                <YAxis tick={{ fontSize: 12, fill: "hsl(200, 10%, 45%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v.toLocaleString("en-IN")}`} />
                 <Tooltip
                   contentStyle={{ borderRadius: "0.75rem", border: "1px solid hsl(220, 15%, 88%)", boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}
-                  formatter={(value: number) => [`$${value.toLocaleString("en-US", { minimumFractionDigits: 2 })}`, "Balance"]}
+                  formatter={(value: number) => [formatINR(value), "Balance"]}
                 />
                 <Area type="monotone" dataKey="balance" stroke="hsl(145, 52%, 34%)" strokeWidth={2.5} fill="url(#balanceGradient)" />
               </AreaChart>
@@ -150,7 +148,7 @@ export default function Dashboard() {
             {[
               { label: "Status", value: account.status || "Active" },
               { label: "Email", value: account.email },
-              { label: "Created", value: account.createdAt ? new Date(account.createdAt).toLocaleDateString() : "N/A" },
+              { label: "Created", value: account.createdAt ? new Date(account.createdAt).toLocaleDateString("en-IN") : "N/A" },
             ].map((row) => (
               <div key={row.label} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
                 <span className="text-sm text-muted-foreground">{row.label}</span>
@@ -180,7 +178,6 @@ export default function Dashboard() {
   );
 }
 
-/** Generate mock balance trend data when no transactions exist yet */
 function generateMockTrend(currentBalance: number) {
   const data = [];
   let balance = currentBalance * 0.7;
@@ -190,11 +187,10 @@ function generateMockTrend(currentBalance: number) {
     balance += (Math.random() - 0.3) * (currentBalance * 0.08);
     balance = Math.max(0, balance);
     data.push({
-      date: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      date: date.toLocaleDateString("en-IN", { month: "short", day: "numeric" }),
       balance: Math.round(balance * 100) / 100,
     });
   }
-  // Ensure last point matches current balance
   data[data.length - 1].balance = currentBalance;
   return data;
 }
