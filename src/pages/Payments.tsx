@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
+import { formatINR } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,11 +16,8 @@ export default function Payments() {
   const { account, updateAccount } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  // Deposit
   const [depositAmt, setDepositAmt] = useState("");
-  // Withdraw
   const [withdrawAmt, setWithdrawAmt] = useState("");
-  // Transfer
   const [transferDest, setTransferDest] = useState("");
   const [transferAmt, setTransferAmt] = useState("");
   const [transferDesc, setTransferDesc] = useState("");
@@ -39,7 +37,7 @@ export default function Payments() {
     setLoading(true);
     try {
       await api.deposit({ accountNumber: account!.accountNumber, amount });
-      toast.success(`$${amount.toFixed(2)} deposited successfully!`);
+      toast.success(`${formatINR(amount)} deposited successfully!`);
       setDepositAmt("");
       await refreshAccount();
     } catch (err: any) { toast.error(err.message); } finally { setLoading(false); }
@@ -52,7 +50,7 @@ export default function Payments() {
     setLoading(true);
     try {
       await api.withdraw({ accountNumber: account!.accountNumber, amount });
-      toast.success(`$${amount.toFixed(2)} withdrawn successfully!`);
+      toast.success(`${formatINR(amount)} withdrawn successfully!`);
       setWithdrawAmt("");
       await refreshAccount();
     } catch (err: any) { toast.error(err.message); } finally { setLoading(false); }
@@ -66,7 +64,7 @@ export default function Payments() {
     setLoading(true);
     try {
       await api.transfer({ sourceAccountNumber: account!.accountNumber, destinationAccountNumber: transferDest.trim(), amount, description: transferDesc.trim() || "Fund Transfer" });
-      toast.success(`$${amount.toFixed(2)} transferred successfully!`);
+      toast.success(`${formatINR(amount)} transferred successfully!`);
       setTransferDest(""); setTransferAmt(""); setTransferDesc("");
       await refreshAccount();
     } catch (err: any) { toast.error(err.message); } finally { setLoading(false); }
@@ -97,7 +95,7 @@ export default function Payments() {
                 <Input value={account.accountNumber} disabled className="h-12 font-mono bg-muted" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="depositAmt">Amount ($)</Label>
+                <Label htmlFor="depositAmt">Amount (₹)</Label>
                 <Input id="depositAmt" type="number" min="0.01" step="0.01" placeholder="0.00" value={depositAmt} onChange={(e) => setDepositAmt(e.target.value)} className="h-12 text-lg" />
               </div>
               <Button type="submit" variant="success" className="w-full h-12" disabled={loading}>
@@ -116,7 +114,7 @@ export default function Payments() {
                 <Input value={account.accountNumber} disabled className="h-12 font-mono bg-muted" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="withdrawAmt">Amount ($)</Label>
+                <Label htmlFor="withdrawAmt">Amount (₹)</Label>
                 <Input id="withdrawAmt" type="number" min="0.01" step="0.01" placeholder="0.00" value={withdrawAmt} onChange={(e) => setWithdrawAmt(e.target.value)} className="h-12 text-lg" />
               </div>
               <Button type="submit" variant="destructive" className="w-full h-12" disabled={loading}>
@@ -139,7 +137,7 @@ export default function Payments() {
                 <Input id="transferDest" placeholder="ACC00000002" value={transferDest} onChange={(e) => setTransferDest(e.target.value)} className="h-12 font-mono" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="transferAmt">Amount ($)</Label>
+                <Label htmlFor="transferAmt">Amount (₹)</Label>
                 <Input id="transferAmt" type="number" min="0.01" step="0.01" placeholder="0.00" value={transferAmt} onChange={(e) => setTransferAmt(e.target.value)} className="h-12 text-lg" />
               </div>
               <div className="space-y-2">

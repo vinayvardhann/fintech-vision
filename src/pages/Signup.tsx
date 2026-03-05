@@ -54,14 +54,14 @@ export default function Signup() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="holderName">Full Name</Label>
-              <Input id="holderName" placeholder="John Doe" value={form.holderName} onChange={(e) => setForm({ ...form, holderName: e.target.value })} className="h-12" />
+              <Input id="holderName" placeholder="Rahul Sharma" value={form.holderName} onChange={(e) => setForm({ ...form, holderName: e.target.value })} className="h-12" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" placeholder="john@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="h-12" />
+              <Input id="email" type="email" placeholder="rahul@example.in" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="h-12" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="balance">Initial Balance ($)</Label>
+              <Label htmlFor="balance">Initial Balance (₹)</Label>
               <Input id="balance" type="number" min="0" step="0.01" placeholder="1000.00" value={form.initialBalance || ""} onChange={(e) => setForm({ ...form, initialBalance: parseFloat(e.target.value) || 0 })} className="h-12" />
             </div>
             <div className="space-y-2">
