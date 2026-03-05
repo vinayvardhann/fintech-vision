@@ -2,7 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { api, Transaction } from "@/lib/api";
 import { formatINR } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
-import { Wallet, CreditCard, TrendingUp, AlertTriangle, RefreshCw } from "lucide-react";
+import { Wallet, CreditCard, TrendingUp, AlertTriangle, RefreshCw, Power } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -34,6 +34,23 @@ export default function Dashboard() {
   if (!account) return null;
 
   const isLowBalance = account.balance < LOW_BALANCE_THRESHOLD;
+
+  // Balance Alert Tracker — console log for low-balance alerts
+  if (isLowBalance) {
+    console.warn(`[VaultBank Balance Alert] Account ${account.accountNumber} balance is ₹${account.balance.toFixed(2)}, below threshold ₹${LOW_BALANCE_THRESHOLD.toFixed(2)}. Immediate attention required.`);
+  }
+
+  const handleToggleStatus = async () => {
+    try {
+      const updated = account.status === "Active" || account.status === "ACTIVE"
+        ? await api.deactivateAccount(account.accountNumber)
+        : await api.activateAccount(account.accountNumber);
+      updateAccount(updated);
+      toast.success(`Account ${updated.status === "Active" || updated.status === "ACTIVE" ? "activated" : "deactivated"} successfully`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update account status");
+    }
+  };
 
   const balanceTrend = transactions.length > 0
     ? transactions
@@ -143,10 +160,21 @@ export default function Dashboard() {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-6 shadow-card">
-          <h3 className="font-display text-lg font-semibold text-foreground mb-4">Account Details</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display text-lg font-semibold text-foreground">Account Details</h3>
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              (account.status || "Active").toLowerCase() === "active" 
+                ? "bg-accent/10 text-accent" 
+                : "bg-destructive/10 text-destructive"
+            }`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${
+                (account.status || "Active").toLowerCase() === "active" ? "bg-accent" : "bg-destructive"
+              }`} />
+              {account.status || "Active"}
+            </span>
+          </div>
           <div className="space-y-3">
             {[
-              { label: "Status", value: account.status || "Active" },
               { label: "Email", value: account.email },
               { label: "Created", value: account.createdAt ? new Date(account.createdAt).toLocaleDateString("en-IN") : "N/A" },
             ].map((row) => (
@@ -156,6 +184,15 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
+          <Button
+            variant={(account.status || "Active").toLowerCase() === "active" ? "destructive" : "success"}
+            size="sm"
+            className="w-full mt-4"
+            onClick={handleToggleStatus}
+          >
+            <Power className="mr-2 h-4 w-4" />
+            {(account.status || "Active").toLowerCase() === "active" ? "Deactivate Account" : "Activate Account"}
+          </Button>
         </div>
         <div className="rounded-xl border border-border bg-card p-6 shadow-card">
           <h3 className="font-display text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
