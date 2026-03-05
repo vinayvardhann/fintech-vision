@@ -65,6 +65,8 @@ export const api = {
   getAccounts: () => request<Account[]>("/accounts"),
   getAccount: (accountNumber: string) => request<Account>(`/accounts/${accountNumber}`),
   createAccount: (data: SignUpData) => request<Account>("/accounts", { method: "POST", body: JSON.stringify(data) }),
+  activateAccount: (accountNumber: string) => request<Account>(`/accounts/${accountNumber}/activate`, { method: "PUT" }),
+  deactivateAccount: (accountNumber: string) => request<Account>(`/accounts/${accountNumber}/deactivate`, { method: "PUT" }),
 
   // Transactions
   deposit: (data: DepositData) => request<Transaction>("/transactions/deposit", { method: "POST", body: JSON.stringify(data) }),
